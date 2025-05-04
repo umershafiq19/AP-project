@@ -24,12 +24,11 @@ export default function Home() {
 
   if (!users.length) return <div>Loading...</div>;
 
-  const allPosts = users.flatMap((user) =>
-    user.posts.map((post) => ({
-      ...post,
-      user,
-    }))
-  );
+  // Display only one post per user
+  const allPosts = users.map((user) => ({
+    ...user.posts[0], // Get the first post of each user
+    user,
+  }));
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#111", color: "#fff" }}>
@@ -56,7 +55,6 @@ export default function Home() {
 }
 
 function PostCard({ post, router }) {
-  // Initialize likes and comments from localStorage if available
   const storedLikes = localStorage.getItem(`likes-${post.id}`);
   const storedComments = JSON.parse(localStorage.getItem(`comments-${post.id}`)) || [];
 
@@ -65,18 +63,15 @@ function PostCard({ post, router }) {
   const [comments, setComments] = useState(storedComments);
   const [showCommentBox, setShowCommentBox] = useState(false);
 
-  // Toggle Like function
   const handleLike = async () => {
     const newLikes = hasLiked ? likes - 1 : likes + 1;
     setLikes(newLikes);
     setHasLiked(!hasLiked);
 
-    // Save likes in localStorage
     localStorage.setItem(`likes-${post.id}`, newLikes);
 
-    // Update the backend with the new like count (optional)
     await fetch(`/api/posts/${post.id}/like`, {
-      method: hasLiked ? "DELETE" : "POST", // If liked, remove like, else add like
+      method: hasLiked ? "DELETE" : "POST",
     });
   };
 
@@ -88,19 +83,17 @@ function PostCard({ post, router }) {
     setComments(newComments);
     e.target.reset();
 
-    // Save comments in localStorage
     localStorage.setItem(`comments-${post.id}`, JSON.stringify(newComments));
 
-    // Send the comment to the backend (optional)
     await fetch(`/api/posts/${post.id}/comment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ comment }),
     });
   };
+
   return (
     <div style={{ width: "100%", border: "1px solid #444", borderRadius: "12px", overflow: "hidden", backgroundColor: "#1a1a1a", marginBottom: "20px" }}>
-      {/* Username and Avatar at top */}
       <div style={{ display: "flex", alignItems: "center", padding: "10px 15px", backgroundColor: "#222", borderBottom: "1px solid #333" }}>
         <img
           src={post.user.avatar}
@@ -114,12 +107,10 @@ function PostCard({ post, router }) {
         </Link>
       </div>
 
-      {/* Post Image */}
       <div style={{ position: "relative", width: "100%", height: "300px" }}>
         <Image src={post.image} alt="Post" layout="fill" objectFit="cover" />
       </div>
 
-      {/* Post Caption and Buttons */}
       <div style={{ padding: "15px" }}>
         <p>{post.caption}</p>
         <p style={{ color: "#aaa", marginBottom: "10px" }}>{likes} likes</p>
@@ -143,7 +134,6 @@ function PostCard({ post, router }) {
           </form>
         )}
 
-        {/* Show Comments */}
         <div style={{ marginTop: "10px", color: "#ccc" }}>
           {comments.map((c, idx) => (
             <p key={idx} style={{ marginBottom: "4px" }}>💬 {c}</p>

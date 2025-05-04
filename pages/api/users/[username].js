@@ -1,22 +1,30 @@
 // pages/api/users/[username].js
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User"; // Mongoose model
+import clientPromise from "@/lib/mongodb";
+import mongoose from "mongodb";
 
 export default async function handler(req, res) {
   const { username } = req.query;
 
-  await dbConnect();
+  if (req.method !== "GET") {
+    return res.status(405).end("Method Not Allowed");
+  }
 
   try {
-    const user = await User.findOne({ username });
+    const client = await clientPromise;
+    const db = client.db("social-media"); // Change to your actual DB name
+
+    const user = await db.collection("users").findOne(
+      { username },
+      { projection: { password: 0 } } // Optional: exclude sensitive fields
+    );
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(user);
+    res.status(200).json({ ...user, posts: user.posts || [] });
   } catch (err) {
-    console.error("Error fetching user:", err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Failed to fetch user profile:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 }

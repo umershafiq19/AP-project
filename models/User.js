@@ -1,4 +1,3 @@
-// models/User.js
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema({
@@ -6,9 +5,11 @@ const UserSchema = new mongoose.Schema({
   name: String,
   avatar: String,
   bio: String,
-  followers: Number,
-  following: Number,
-  // add other fields if needed
+  followers: { type: Number, default: 0 },
+  following: { type: Number, default: 0 },
+  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
 });
 
-export default mongoose.models.User || mongoose.model("User", UserSchema);
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
+
+export default User;
