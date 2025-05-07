@@ -33,17 +33,40 @@ export default function Home() {
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#111", color: "#fff" }}>
       {/* Sidebar */}
-      <aside style={{ width: "200px", padding: "20px", backgroundColor: "#222" }}>
-        <nav>
-          <p><Link href="/" className="nav-link">Home</Link></p>
-          <p><Link href="/explore" className="nav-link">Explore</Link></p>
-          <p><Link href="/notifications" className="nav-link">Notifications</Link></p>
-          <p><Link href="/profile" className="nav-link">Profile</Link></p>
+      <aside
+        style={{
+          width: "250px",
+          height: "100vh",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          backgroundColor: "#1e1e1e",
+          padding: "30px 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+          borderRight: "1px solid #333",
+        }}
+      >
+        <h2 style={{ color: "#fff", marginBottom: "30px", fontSize: "24px" }}>Connectify</h2>
+        <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          <Link href="/" style={navLinkStyle}>🏠 Home</Link>
+          <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
+          <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
+          <Link href="/profile" style={navLinkStyle}>👤 Profile</Link>
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: "20px", display: "flex", justifyContent: "center" }}>
+      <main
+        style={{
+          marginLeft: "250px", // same as sidebar width
+          flex: 1,
+          padding: "20px",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <div style={{ maxWidth: "600px", width: "100%" }}>
           {allPosts.map((post) => (
             <PostCard key={post.id} post={post} router={router} />
@@ -54,12 +77,21 @@ export default function Home() {
   );
 }
 
+const navLinkStyle = {
+  color: "#ccc",
+  textDecoration: "none",
+  fontSize: "18px",
+  padding: "10px 15px",
+  borderRadius: "8px",
+  transition: "all 0.3s ease",
+};
+
 function PostCard({ post, router }) {
   const storedLikes = localStorage.getItem(`likes-${post.id}`);
   const storedComments = JSON.parse(localStorage.getItem(`comments-${post.id}`)) || [];
 
   const [likes, setLikes] = useState(storedLikes ? parseInt(storedLikes) : post.likes || 0);
-  const [hasLiked, setHasLiked] = useState(storedLikes ? true : false);
+  const [hasLiked, setHasLiked] = useState(!!storedLikes);
   const [comments, setComments] = useState(storedComments);
   const [showCommentBox, setShowCommentBox] = useState(false);
 
@@ -67,9 +99,7 @@ function PostCard({ post, router }) {
     const newLikes = hasLiked ? likes - 1 : likes + 1;
     setLikes(newLikes);
     setHasLiked(!hasLiked);
-
     localStorage.setItem(`likes-${post.id}`, newLikes);
-
     await fetch(`/api/posts/${post.id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
@@ -79,12 +109,9 @@ function PostCard({ post, router }) {
     e.preventDefault();
     const comment = e.target.elements.comment.value;
     const newComments = [...comments, comment];
-
     setComments(newComments);
     e.target.reset();
-
     localStorage.setItem(`comments-${post.id}`, JSON.stringify(newComments));
-
     await fetch(`/api/posts/${post.id}/comment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -126,9 +153,27 @@ function PostCard({ post, router }) {
             <input
               name="comment"
               placeholder="Write a comment..."
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #555", backgroundColor: "#222", color: "#fff", marginBottom: "8px" }}
+              style={{
+                width: "100%",
+                padding: "8px",
+                borderRadius: "6px",
+                border: "1px solid #555",
+                backgroundColor: "#222",
+                color: "#fff",
+                marginBottom: "8px",
+              }}
             />
-            <button type="submit" style={{ padding: "6px 12px", backgroundColor: "#4caf50", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}>
+            <button
+              type="submit"
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#4caf50",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+              }}
+            >
               Post
             </button>
           </form>
