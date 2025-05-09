@@ -82,7 +82,7 @@ export default function UploadPhoto() {
           <Link href="/" style={navLinkStyle}>🏠 Home</Link>
           <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
           <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
-          <Link href="/upload/uploadphoto" style={{ ...navLinkStyle, backgroundColor: '#333' }}>📸 Add a Post</Link>
+          <Link href="/upload/" style={navLinkStyle}>📸 Add a Post</Link>
           <Link href="/profile" style={navLinkStyle}>👤 Profile</Link>
         </nav>
       </aside>
