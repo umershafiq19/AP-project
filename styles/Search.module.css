@@ -1,0 +1,107 @@
+/* SearchPage.module.css */
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #111;
+  color: #fff;
+}
+
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #1e1e1e;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-right: 1px solid #333;
+}
+
+.sidebar h2 {
+  color: #fff;
+  margin-bottom: 30px;
+  font-size: 24px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.navLink {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.main {
+  flex: 1;
+  margin-left: 250px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.searchInput {
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: 1px solid #444;
+  background-color: #1f1f1f;
+  color: #fff;
+  width: 300px;
+}
+
+.searchButton {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background-color: #4caf50;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.suggestionsBox {
+  width: 320px;
+  background-color: #222;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #333;
+  cursor: pointer;
+}
+
+.avatar {
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid #444;
+}
+
+.resultBox {
+  background-color: #1a1a1a;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+}
+
+.resultItem {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}

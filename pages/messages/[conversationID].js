@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import styles from "../../styles/ChatPage.module.css"; // Create this file
+import styles from "../../styles/ChatPage.module.css"; 
 
 export default function ChatPage() {
   const router = useRouter();

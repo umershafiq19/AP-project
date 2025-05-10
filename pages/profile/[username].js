@@ -1,29 +1,13 @@
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+// pages/profile/[username].js
 import Image from "next/image";
 import Link from "next/link";
+import dbConnect from "@/lib/dbConnect";
+import User from "@/models/User";
 
-export default function UserProfile() {
-  const router = useRouter();
-  const { username } = router.query;
+import { useState } from "react";
 
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    if (!username) return;
-    const fetchUser = async () => {
-      try {
-        const res = await fetch(`/api/users/${username}`);
-        const data = await res.json();
-        setUser(data);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-      }
-    };
-    fetchUser();
-  }, [username]);
-
-  if (!user) return <div style={styles.loading}>Loading profile...</div>;
+export default function UserProfile({ user }) {
+  if (!user) return <div style={styles.loading}>User not found.</div>;
 
   return (
     <div style={styles.container}>
@@ -47,15 +31,15 @@ export default function UserProfile() {
 
       {/* User Posts */}
       <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)", // 3 posts per row
-          gap: "15px",
-          maxWidth: "900px",
-          width: "100%",
-        }}>
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: "15px",
+        maxWidth: "900px",
+        width: "100%",
+      }}>
         {user?.posts?.length > 0 ? (
           user.posts.map((post) => (
-            <PostCard key={post.id} post={{ ...post, user }} />
+            <PostCard key={post._id} post={{ ...post, user }} />
           ))
         ) : (
           <p style={{ color: "#888" }}>No posts to display.</p>
@@ -65,10 +49,34 @@ export default function UserProfile() {
   );
 }
 
-// --- PostCard copied from Home page ---
+export async function getServerSideProps(context) {
+  const { username } = context.params;
+
+  await dbConnect('social-media');
+
+  try {
+    const user = await User.findOne({ username }).lean(); // 🔥 no populate
+
+    if (!user) return { notFound: true };
+
+    return {
+      props: {
+        user: JSON.parse(JSON.stringify(user)), // ✅ send embedded posts too
+      },
+    };
+  } catch (err) {
+    console.error("❌ Error fetching user:", err);
+    return { notFound: true };
+  }
+}
+
+
+// ----- PostCard Component -----
 function PostCard({ post }) {
-  const storedLikes = localStorage.getItem(`likes-${post.id}`);
-  const storedComments = JSON.parse(localStorage.getItem(`comments-${post.id}`)) || [];
+  const storedLikes = typeof window !== 'undefined' ? localStorage.getItem(`likes-${post._id}`) : null;
+  const storedComments = typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem(`comments-${post._id}`)) || []
+    : [];
 
   const [likes, setLikes] = useState(storedLikes ? parseInt(storedLikes) : post.likes || 0);
   const [hasLiked, setHasLiked] = useState(!!storedLikes);
@@ -79,9 +87,9 @@ function PostCard({ post }) {
     const newLikes = hasLiked ? likes - 1 : likes + 1;
     setLikes(newLikes);
     setHasLiked(!hasLiked);
-    localStorage.setItem(`likes-${post.id}`, newLikes);
+    localStorage.setItem(`likes-${post._id}`, newLikes);
 
-    await fetch(`/api/posts/${post.id}/like`, {
+    await fetch(`/api/posts/${post._id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
   };
@@ -92,9 +100,9 @@ function PostCard({ post }) {
     const newComments = [...comments, comment];
     setComments(newComments);
     e.target.reset();
-    localStorage.setItem(`comments-${post.id}`, JSON.stringify(newComments));
+    localStorage.setItem(`comments-${post._id}`, JSON.stringify(newComments));
 
-    await fetch(`/api/posts/${post.id}/comment`, {
+    await fetch(`/api/posts/${post._id}/comment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ comment }),
@@ -103,7 +111,6 @@ function PostCard({ post }) {
 
   return (
     <div style={styles.postCard}>
-      {/* Username and Avatar */}
       <div style={styles.postHeader}>
         <img
           src={post.user.avatar}
@@ -117,12 +124,10 @@ function PostCard({ post }) {
         </Link>
       </div>
 
-      {/* Image */}
       <div style={{ position: "relative", width: "100%", height: "300px" }}>
         <Image src={post.image} alt="Post" layout="fill" objectFit="cover" />
       </div>
 
-      {/* Caption and Actions */}
       <div style={{ padding: "15px" }}>
         <p>{post.caption}</p>
         <p style={{ color: "#aaa", marginBottom: "10px" }}>{likes} likes</p>
@@ -187,15 +192,9 @@ const styles = {
     borderBottom: "1px solid #444",
     paddingBottom: "20px",
   },
-  postsContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",          // 👈 Center children horizontally
-    gap: "15px",
-  },
   postCard: {
     width: "100%",
-    maxWidth: "500px",             // 👈 Limit the width
+    maxWidth: "500px",
     border: "1px solid #444",
     borderRadius: "12px",
     overflow: "hidden",
@@ -209,4 +208,3 @@ const styles = {
     borderBottom: "1px solid #333",
   },
 };
-

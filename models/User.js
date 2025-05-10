@@ -7,9 +7,10 @@ const UserSchema = new mongoose.Schema({
   bio: String,
   followers: { type: Number, default: 0 },
   following: { type: Number, default: 0 },
-  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
 });
 
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
+// Avoid redefining the model on hot reloads in dev
+const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 export default User;
