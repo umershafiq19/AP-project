@@ -1,5 +1,5 @@
 import dbConnect from '@/lib/dbConnect';
-import Conversation from '@/models/Conversation';
+import Conversation from '@/models/conversation';
 
 export default async function handler(req, res) {
   await dbConnect();
@@ -13,5 +13,5 @@ export default async function handler(req, res) {
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
-  }
+  };
 }

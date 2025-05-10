@@ -48,12 +48,11 @@ export default function Home() {
           borderRight: "1px solid #333",
         }}
       >
-        <h2 style={{ color: '#fff', marginBottom: '30px', fontSize: '24px' }}>Connectify</h2>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <h2 style={{ color: "#fff", marginBottom: "30px", fontSize: "24px" }}>Connectify</h2>
+        <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
           <Link href="/" style={navLinkStyle}>🏠 Home</Link>
           <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
           <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
-          <Link href="/upload/" style={navLinkStyle}>📸 Add a Post</Link>
           <Link href="/profile" style={navLinkStyle}>👤 Profile</Link>
         </nav>
       </aside>
@@ -144,10 +143,14 @@ function PostCard({ post, router }) {
         <p style={{ color: "#aaa", marginBottom: "10px" }}>{likes} likes</p>
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-          <button onClick={handleLike} style={buttonStyle("❤️", "#ff4081")}>❤️ Like</button>
-          <button onClick={() => setShowCommentBox(!showCommentBox)} style={buttonStyle("💬", "#00bcd4")}>💬 Comment</button>
-          <button style={buttonStyle("🔗", "#9c27b0")}>🔗 Share</button>
-        </div>
+  <button onClick={handleLike} style={buttonStyle("❤️", "#ff4081")}>❤️ Like</button>
+  <button onClick={() => setShowCommentBox(!showCommentBox)} style={buttonStyle("💬", "#00bcd4")}>💬 Comment</button>
+  <button style={buttonStyle("🔗", "#9c27b0")}>🔗 Share</button>
+  <Link href="/messages/[converstionID].js" passHref>
+    <button style={buttonStyle("✉️", "#3f51b5")}>✉️ Messages</button>
+  </Link>
+</div>
+
 
         {showCommentBox && (
           <form onSubmit={handleCommentSubmit}>

@@ -1,14 +1,15 @@
 // pages/messages/index.js
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
+import "../../styles/MessagePage.module.css"
 export default function MessagesPage() {
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const currentUserId = "66349f3125f7e6cc0fdd1b18"; // Static for now
+  const currentUserId = "66349f3125f7e6cc0fdd1b18";
+  const messagesEndRef = useRef(null);
 
-  // Fetch all chat users (Inbox)
   useEffect(() => {
     async function fetchInbox() {
       const res = await fetch(`/api/messages/inbox/${currentUserId}`);
@@ -18,14 +19,17 @@ export default function MessagesPage() {
     fetchInbox();
   }, []);
 
-  // Fetch messages when a user is selected
   useEffect(() => {
     if (selectedChat) {
       fetch(`/api/messages/${currentUserId}/${selectedChat._id}`)
-        .then(res => res.json())
-        .then(data => setMessages(data));
+        .then((res) => res.json())
+        .then((data) => setMessages(data));
     }
   }, [selectedChat]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const sendMessage = async () => {
     if (!text.trim() || !selectedChat) return;
@@ -37,95 +41,90 @@ export default function MessagesPage() {
         receiverId: selectedChat._id,
         content: text,
       }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
 
     setText("");
 
-    // Refresh chat
     const res = await fetch(`/api/messages/${currentUserId}/${selectedChat._id}`);
     const data = await res.json();
     setMessages(data);
   };
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Sidebar: Inbox */}
-      <div className="w-1/3 border-r overflow-y-auto">
-        <h2 className="text-xl font-bold p-4">Chats</h2>
-        {chats.length === 0 ? (
-          <p className="text-gray-500 px-4">No conversations yet</p>
-        ) : (
-          chats.map((chat) => (
-            <div
-              key={chat._id}
-              onClick={() => setSelectedChat(chat)}
-              className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 ${
-                selectedChat && selectedChat._id === chat._id ? "bg-gray-100" : ""
-              }`}
-            >
-              <img
-                src={chat.avatar || "/default-avatar.png"}
-                alt="avatar"
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <p className="font-semibold">{chat.username}</p>
-                <p className="text-sm text-gray-600 truncate max-w-[200px]">{chat.lastMessage}</p>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Right Panel: Chat Window */}
-      <div className="w-2/3 flex flex-col">
-        {selectedChat ? (
-          <>
-            <div className="border-b p-4 font-semibold">
-              Chat with {selectedChat.username}
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`max-w-[70%] p-2 rounded-lg ${
-                    msg.senderId === currentUserId
-                      ? "ml-auto bg-blue-500 text-white text-right"
-                      : "mr-auto bg-gray-200 text-black text-left"
-                  }`}
-                >
-                  {msg.content}
-                </div>
-              ))}
-            </div>
-
-            {/* Input */}
-            <div className="border-t p-4 flex">
-              <input
-                className="border rounded-full flex-1 px-4 py-2 mr-2"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Type a message..."
-              />
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                onClick={sendMessage}
-              >
-                Send
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-center flex-1 text-gray-400">
-            Select a conversation to start chatting
+    <div className="page-container">
+  {/* Sidebar */}
+  <div className="sidebar">
+    <h2 className="sidebar-header">Inbox</h2>
+    {chats.length === 0 ? (
+      <p className="text-gray-500 px-5 mt-4">No conversations yet</p>
+    ) : (
+      chats.map((chat) => (
+        <div
+          key={chat._id}
+          onClick={() => setSelectedChat(chat)}
+          className={`chat-item ${selectedChat && selectedChat._id === chat._id ? "selected" : ""}`}
+        >
+          <Image
+            src={chat.avatar || "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d"}
+            width={40}
+            height={40}
+            className="chat-avatar"
+            alt="avatar"
+          />
+          <div className="chat-info">
+            <p className="chat-username">{chat.username}</p>
+            <p className="chat-last-message">{chat.lastMessage}</p>
           </div>
-        )}
+        </div>
+      ))
+    )}
+  </div>
+
+  {/* Chat Window */}
+  <div className="chat-window">
+    {selectedChat ? (
+      <>
+        <div className="chat-header">
+          <Image
+            src={selectedChat.avatar || "https://images.unsplash.com/photo-1544005313-94ddf0286df2"}
+            width={40}
+            height={40}
+            className="chat-avatar"
+            alt="user"
+          />
+          <h2>{selectedChat.username}</h2>
+        </div>
+
+        <div className="chat-body">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`message ${msg.senderId === currentUserId ? "me" : "other"}`}
+            >
+              <div className="message-bubble">{msg.content}</div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="chat-footer">
+          <input
+            type="text"
+            placeholder="Type a message..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <button onClick={sendMessage}>Send</button>
+        </div>
+      </>
+    ) : (
+      <div className="chat-body">
+        <p style={{ textAlign: "center", color: "#999", marginTop: "30%" }}>
+          Select a conversation to start chatting 💬
+        </p>
       </div>
-    </div>
-  );
-}
+    )}
+  </div>
+</div>
+  )}
