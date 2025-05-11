@@ -35,7 +35,7 @@ export default function UploadPhoto() {
     formData.append('caption', caption);
 
     try {
-      const res = await fetch('/api/posts', {
+      const res = await fetch('/api/uploadphoto/upload', {
         method: 'POST',
         body: formData,
       });
