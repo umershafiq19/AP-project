@@ -6,21 +6,34 @@ import Image from "next/image";
 export default function Home() {
   const router = useRouter();
   const [users, setUsers] = useState([]);
-
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch("/api/users");
-        const data = await res.json();
-        if (data) {
-          setUsers(data);
+      const checkAuthAndFetchData = async () => {
+        // Check authentication
+        const token = document.cookie.includes('token');
+        if (!token) {
+          router.push('/login');
+          return;
         }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-    fetchUsers();
-  }, []);
+  
+        // Fetch users if authenticated
+        try {
+          const res = await fetch("/api/users", { credentials: "include" });
+          const data = await res.json();
+          if (data) {
+            setUsers(data);
+          }
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      checkAuthAndFetchData();
+    }, [router]);
+  
+
+
 
   if (!users.length) return <div>Loading...</div>;
 
@@ -52,6 +65,7 @@ export default function Home() {
         <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
           <Link href="/" style={navLinkStyle}>🏠 Home</Link>
           <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
+          <Link href="/messages" style={navLinkStyle}>🔔 Inbox</Link>
           <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
           <Link href="/profile" style={navLinkStyle}>👤 Profile</Link>
         </nav>
