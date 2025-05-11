@@ -10,19 +10,29 @@ export default function Signup() {
   const [selectedGender, setSelectedGender] = useState('');
 
   const onSubmit = async (data) => {
-    try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (result.error) setError(result.error);
-      else setSuccess(true);
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-    }
+  const payload = {
+    username: data.username,
+    email: data.phoneOrEmail,
+    password: data.password,
+    name: `${data.firstName} ${data.surname}`,
+    gender: data.gender === 'custom' ? data.customGender : data.gender,
+    dob: `${data.day}-${data.month}-${data.year}`, // optional
   };
+
+  try {
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await res.json();
+    if (result.error) setError(result.error);
+    else setSuccess(true);
+  } catch (err) {
+    setError('An error occurred. Please try again.');
+  }
+};
+
 
   // Generate date options
   const days = Array.from({length: 31}, (_, i) => i + 1);
@@ -50,6 +60,12 @@ export default function Signup() {
               placeholder="First name"
               className={styles.input}
             />
+            <input
+            {...register('username', { required: true })}
+            placeholder="Username"
+            className={styles.input}
+            />
+
             <input
               {...register('surname', { required: true })}
               placeholder="Surname"

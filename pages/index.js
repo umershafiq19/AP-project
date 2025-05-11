@@ -2,38 +2,61 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
+import Navbar from "@/component/Navbar";
 
 export default function Home() {
   const router = useRouter();
   const [users, setUsers] = useState([]);
+  const [username, setUsername] = useState(null);
+
+  const handleSignOut = async () => {
+  try {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    router.push("/login");
+  } catch (error) {
+    console.error("Logout failed", error);
+  }
+};
+
   useEffect(() => {
-      const checkAuthAndFetchData = async () => {
-        // Check authentication
-        const token = document.cookie.includes('token');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-  
-        // Fetch users if authenticated
-        try {
-          const res = await fetch("/api/users", { credentials: "include" });
+  const checkAuthAndFetchData = async () => {
+    try {
+      const res = await fetch("/api/users", { credentials: "include" });
+      
+      if (res.status === 401) {
+        router.push('/login');
+        return;
+      }
+
+      const data = await res.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  checkAuthAndFetchData();
+}, [router]);
+
+
+useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
           const data = await res.json();
-          if (data) {
-            setUsers(data);
-          }
-        } catch (error) {
-          console.error("Error fetching users:", error);
-        } finally {
-          setLoading(false);
+          setUsername(data.username); // ✅ Save username into state
         }
-      };
-  
-      checkAuthAndFetchData();
-    }, [router]);
-  
+      } catch (error) {
+        console.error("Failed to fetch logged-in user:", error);
+      }
+    };
 
-
+    fetchUsername();
+  }, []);
 
   if (!users.length) return <div>Loading...</div>;
 
@@ -42,34 +65,12 @@ export default function Home() {
     ...user.posts[0], // Get the first post of each user
     user,
   }));
+ 
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#111", color: "#fff" }}>
       {/* Sidebar */}
-      <aside
-        style={{
-          width: "250px",
-          height: "100vh",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          backgroundColor: "#1e1e1e",
-          padding: "30px 20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          borderRight: "1px solid #333",
-        }}
-      >
-        <h2 style={{ color: "#fff", marginBottom: "30px", fontSize: "24px" }}>Connectify</h2>
-        <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-          <Link href="/" style={navLinkStyle}>🏠 Home</Link>
-          <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
-          <Link href="/messages" style={navLinkStyle}>🔔 Inbox</Link>
-          <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
-          <Link href="/profile" style={navLinkStyle}>👤 Profile</Link>
-        </nav>
-      </aside>
+      <Navbar></Navbar>
 
       {/* Main Content */}
       <main
@@ -91,14 +92,7 @@ export default function Home() {
   );
 }
 
-const navLinkStyle = {
-  color: "#ccc",
-  textDecoration: "none",
-  fontSize: "18px",
-  padding: "10px 15px",
-  borderRadius: "8px",
-  transition: "all 0.3s ease",
-};
+
 
 function PostCard({ post, router }) {
   const storedLikes = localStorage.getItem(`likes-${post.id}`);

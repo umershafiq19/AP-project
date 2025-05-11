@@ -1,18 +1,26 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
+import Navbar from '@/component/Navbar';
 
 export default function UploadPhoto() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [caption, setCaption] = useState('');
   const [banner, setBanner] = useState({ message: '', type: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Prevent multiple submissions
   const router = useRouter();
   const fileInputRef = useRef(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate if the file is an image
+      if (!file.type.startsWith('image/')) {
+        setBanner({ message: 'Please upload a valid image.', type: 'error' });
+        setImage(null);
+        setPreview(null);
+        return;
+      }
       setImage(file);
       setPreview(URL.createObjectURL(file));
     }
@@ -24,9 +32,17 @@ export default function UploadPhoto() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmitting) return;
 
     if (!image) {
       setBanner({ message: 'Please upload an image.', type: 'error' });
+      return;
+    }
+
+    if (!caption) {
+      setBanner({ message: 'Please add a caption.', type: 'error' });
       return;
     }
 
@@ -34,58 +50,42 @@ export default function UploadPhoto() {
     formData.append('image', image);
     formData.append('caption', caption);
 
+    setIsSubmitting(true); // Disable further submissions while uploading
+
     try {
-      const res = await fetch('/api/posts', {
+      // Call the API to create the post
+      const res = await fetch('/api/posts/index', {
         method: 'POST',
         body: formData,
       });
 
       if (res.ok) {
-        setBanner({ message: 'Posted Successfully!', type: 'success' });
-        // Clear the form
+        const post = await res.json();  // Assuming the post object is returned
+
+        // Clear state after successful post creation
+        setBanner({ message: 'Posted successfully!', type: 'success' });
         setImage(null);
         setPreview(null);
         setCaption('');
+
         setTimeout(() => {
           setBanner({ message: '', type: '' });
-          router.push('/');
-        }, 2000); // Redirect after 2 seconds
+          router.push('/profile'); // Redirect to user profile
+        }, 2000);
       } else {
         setBanner({ message: 'Failed to post. Please try again.', type: 'error' });
       }
     } catch (error) {
       setBanner({ message: 'An error occurred. Please try again.', type: 'error' });
+    } finally {
+      setIsSubmitting(false); // Re-enable submission button
     }
   };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#111', color: '#fff' }}>
-      
-      {/* Sidebar */}
-      <aside
-        style={{
-          width: '250px',
-          height: '100vh',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          backgroundColor: '#1e1e1e',
-          padding: '30px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-          borderRight: '1px solid #333',
-        }}
-      >
-        <h2 style={{ color: '#fff', marginBottom: '30px', fontSize: '24px' }}>Connectify</h2>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <Link href="/" style={navLinkStyle}>🏠 Home</Link>
-          <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
-          <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
-          <Link href="/upload/" style={navLinkStyle}>📸 Add a Post</Link>
-          <Link href="/profile" style={navLinkStyle}>👤 Profile</Link>
-        </nav>
-      </aside>
+      {/* Reusable Sidebar */}
+      <Navbar />
 
       {/* Main Content */}
       <main style={{ marginLeft: '250px', flex: 1, padding: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
@@ -110,7 +110,7 @@ export default function UploadPhoto() {
           </div>
         )}
 
-        {/* Center Rectangle */}
+        {/* Post Form */}
         <div
           style={{
             backgroundColor: '#1e1e1e',
@@ -125,7 +125,6 @@ export default function UploadPhoto() {
         >
           <h2 style={{ marginBottom: '20px', fontSize: '24px' }}>Create a Post</h2>
 
-          {/* Upload Container */}
           <div
             onClick={handleContainerClick}
             style={{
@@ -176,7 +175,6 @@ export default function UploadPhoto() {
             </div>
           </div>
 
-          {/* Hidden File Input */}
           <input
             type="file"
             accept="image/*"
@@ -185,7 +183,6 @@ export default function UploadPhoto() {
             style={{ display: 'none' }}
           />
 
-          {/* Caption Textarea */}
           <textarea
             placeholder="Write a caption..."
             value={caption}
@@ -202,7 +199,6 @@ export default function UploadPhoto() {
             }}
           />
 
-          {/* Post Button */}
           <button
             type="button"
             onClick={handleSubmit}
@@ -213,24 +209,15 @@ export default function UploadPhoto() {
               border: 'none',
               borderRadius: '8px',
               fontSize: '16px',
-              cursor: 'pointer',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
               width: '100%',
             }}
+            disabled={isSubmitting}
           >
-            POST
+            {isSubmitting ? 'Posting...' : 'POST'}
           </button>
-
         </div>
       </main>
     </div>
   );
 }
-
-const navLinkStyle = {
-  color: '#ccc',
-  textDecoration: 'none',
-  fontSize: '18px',
-  padding: '10px 15px',
-  borderRadius: '8px',
-  transition: 'all 0.3s ease',
-};

@@ -1,49 +1,57 @@
-// pages/profile/[username].js
 import Image from "next/image";
 import Link from "next/link";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
-
+import Navbar from "@/component/Navbar"; // Import Navbar component
+import Post from "@/models/Post";
 import { useState } from "react";
 
 export default function UserProfile({ user }) {
   if (!user) return <div style={styles.loading}>User not found.</div>;
 
   return (
-    <div style={styles.container}>
-      {/* Profile Header */}
-      <div style={styles.profileHeader}>
-        <Image
-          src={user.avatar}
-          alt="Avatar"
-          width={80}
-          height={80}
-          style={{ borderRadius: "50%", border: "2px solid #fff" }}
-        />
-        <div style={{ marginLeft: "20px" }}>
-          <h2>@{user.username}</h2>
-          <p>{user.bio}</p>
-          <p style={{ color: "#ccc" }}>
-            {user.followers} followers • {user.following} following
-          </p>
-        </div>
-      </div>
+    <div style={styles.pageContainer}>
+      {/* Sidebar - NavBar Component */}
+      <Navbar />
 
-      {/* User Posts */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "15px",
-        maxWidth: "900px",
-        width: "100%",
-      }}>
-        {user?.posts?.length > 0 ? (
-          user.posts.map((post) => (
-            <PostCard key={post._id} post={{ ...post, user }} />
-          ))
-        ) : (
-          <p style={{ color: "#888" }}>No posts to display.</p>
-        )}
+      {/* Main Content */}
+      <div style={styles.mainContent}>
+        {/* Profile Header */}
+        <div style={styles.profileHeader}>
+          <Image
+            src={user.avatar}
+            alt="Avatar"
+            width={80}
+            height={80}
+            style={{ borderRadius: "50%", border: "2px solid #fff" }}
+          />
+          <div style={{ marginLeft: "20px" }}>
+            <h2>@{user.username}</h2>
+            <p>{user.bio}</p>
+            <p style={{ color: "#ccc" }}>
+              {user.followers} followers • {user.following} following
+            </p>
+          </div>
+        </div>
+
+        {/* User Posts */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "15px",
+            maxWidth: "900px",
+            width: "100%",
+          }}
+        >
+          {user?.posts?.length > 0 ? (
+            user.posts.map((post) => (
+              <PostCard key={post._id} post={{ ...post, user }} />
+            ))
+          ) : (
+            <p style={{ color: "#888" }}>No posts to display.</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -55,13 +63,12 @@ export async function getServerSideProps(context) {
   await dbConnect('social-media');
 
   try {
-    const user = await User.findOne({ username }).lean(); // 🔥 no populate
-
+    const user = await User.findOne({ username }).lean(); // No need for populate, as posts are embedded
     if (!user) return { notFound: true };
 
     return {
       props: {
-        user: JSON.parse(JSON.stringify(user)), // ✅ send embedded posts too
+        user: JSON.parse(JSON.stringify(user)), // Send user data with posts
       },
     };
   } catch (err) {
@@ -125,7 +132,17 @@ function PostCard({ post }) {
       </div>
 
       <div style={{ position: "relative", width: "100%", height: "300px" }}>
-        <Image src={post.image} alt="Post" layout="fill" objectFit="cover" />
+        {post.image && (
+  <img
+    src={post.image}
+    alt="Post"
+    style={{
+      width: "100%",
+      height: "300px",
+      objectFit: "cover",
+    }}
+  />
+)}
       </div>
 
       <div style={{ padding: "15px" }}>
@@ -174,11 +191,16 @@ function buttonStyle(icon, color) {
 }
 
 const styles = {
-  container: {
+  pageContainer: {
+    display: "flex",
+  },
+  mainContent: {
     padding: "20px",
     backgroundColor: "#111",
     color: "#fff",
     minHeight: "100vh",
+    marginLeft: "250px", // Adjust the main content margin to prevent overlap
+    width: "100%",
   },
   loading: {
     color: "#fff",

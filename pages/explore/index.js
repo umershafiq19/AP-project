@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Navbar from "@/component/Navbar"; // Import the Navbar component
 import styles from "../../styles/Search.module.css"; 
 
 export default function SearchPage() {
@@ -7,9 +8,8 @@ export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filtered, setFiltered] = useState([]);
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true); // 🆕 Loading state
+  const [loading, setLoading] = useState(true);
 
-  // Fetch user list (runs only on the client)
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -25,10 +25,10 @@ export default function SearchPage() {
     fetchUsers();
   }, []);
 
-  // Filter suggestions while typing
   const handleInputChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
+    setResult(null); // Clear previous result
     if (term === "") {
       setFiltered([]);
     } else {
@@ -39,7 +39,6 @@ export default function SearchPage() {
     }
   };
 
-  // Exact match search
   const handleSearch = () => {
     const exactMatch = users.find(
       (u) => u.username.toLowerCase() === searchTerm.toLowerCase()
@@ -48,58 +47,78 @@ export default function SearchPage() {
   };
 
   return (
-  <div className={styles.container}>
-    {/* Sidebar */}
-    <aside className={styles.sidebar}>
-      <h2>Connectify</h2>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.navLink}>🏠 Home</Link>
-        <Link href="/explore" className={styles.navLink}>🔍 Explore</Link>
-        <Link href="/notifications" className={styles.navLink}>🔔 Notifications</Link>
-        <Link href="/upload/" className={styles.navLink}>📸 Add a Post</Link>
-        <Link href="/profile" className={styles.navLink}>👤 Profile</Link>
-      </nav>
-    </aside>
+    <div className={styles.container}>
+      {/* Navbar Component */}
+      <Navbar />
 
-    {/* Main */}
-    <main className={styles.main}>
-      <h1>🔍 Search Users</h1>
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleInputChange}
-          className={styles.searchInput}
-          placeholder="Search by username..."
-        />
-        <button onClick={handleSearch} className={styles.searchButton}>Search</button>
-      </div>
+      {/* Main */}
+      <main className={styles.main}>
+        <h1>🔍 Search Users</h1>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleInputChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+            }}
+            className={styles.searchInput}
+            placeholder="Search by username..."
+          />
+          <button onClick={handleSearch} className={styles.searchButton}>
+            Search
+          </button>
+        </div>
 
-      {!loading && filtered.length > 0 && (
-        <div className={styles.suggestionsBox}>
-          {filtered.map((user) => (
-            <Link key={user.id} href={`/profile/${user.username}`}>
-              <div className={styles.suggestionItem}>
-                <img src={user.avatar} alt="avatar" width={36} height={36} className={styles.avatar} />
-                <span style={{ color: "#80d8ff", fontWeight: "bold" }}>@{user.username}</span>
+        {loading && <p style={{ color: "#aaa" }}>Loading users...</p>}
+
+        {!loading && filtered.length > 0 && (
+          <div className={styles.suggestionsBox}>
+            {filtered.map((user) => (
+              <Link key={user.id} href={`/profile/${user.username}`}>
+                <div className={styles.suggestionItem}>
+                  <img src={user.avatar} alt="avatar" width={36} height={36} className={styles.avatar} />
+                  <span style={{ color: "#80d8ff", fontWeight: "bold" }}>
+                    @{highlightMatch(user.username, searchTerm)}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {!loading && result && (
+          <div className={styles.resultBox}>
+            <h3>Search Result:</h3>
+            <Link href={`/profile/${result.username}`}>
+              <div className={styles.resultItem}>
+                <img src={result.avatar} alt="avatar" width={36} height={36} className={styles.avatar} />
+                <span style={{ color: "#4fc3f7", fontWeight: "bold" }}>@{result.username}</span>
               </div>
             </Link>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
 
-      {!loading && result && (
-        <div className={styles.resultBox}>
-          <h3>Search Result:</h3>
-          <Link href={`/profile/${result.username}`}>
-            <div className={styles.resultItem}>
-              <img src={result.avatar} alt="avatar" width={36} height={36} className={styles.avatar} />
-              <span style={{ color: "#4fc3f7", fontWeight: "bold" }}>@{result.username}</span>
-            </div>
-          </Link>
-        </div>
-      )}
-    </main>
-  </div>
-);
+        
+      </main>
+    </div>
+  );
+}
+
+// Helper to highlight matching part
+function highlightMatch(username, term) {
+  const index = username.toLowerCase().indexOf(term.toLowerCase());
+  if (index === -1) return username;
+
+  const before = username.slice(0, index);
+  const match = username.slice(index, index + term.length);
+  const after = username.slice(index + term.length);
+
+  return (
+    <>
+      {before}
+      <span style={{ textDecoration: "underline", color: "#fff" }}>{match}</span>
+      {after}
+    </>
+  );
 }

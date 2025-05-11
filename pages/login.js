@@ -1,21 +1,31 @@
-//pages/login.js
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { signIn } from 'next-auth/react';
-import styles from '@/styles/Login.module.css'; // Create this CSS file
+import { useRouter } from 'next/router'; // ✅ Import useRouter
+import styles from '@/styles/Login.module.css';
 
 export default function Login() {
   const { register, handleSubmit } = useForm();
   const [error, setError] = useState('');
+  const router = useRouter(); // ✅ Initialize router
 
   const onSubmit = async ({ email, password }) => {
-    const res = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
-    });
-    if (res?.error) setError(res.error);
-    else window.location.href = '/index';
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Login failed');
+      } else {
+        router.push('/'); // ✅ Smooth client-side redirect
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    }
   };
 
   return (

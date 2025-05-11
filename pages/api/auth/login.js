@@ -1,8 +1,9 @@
 //pages/api/auth/login.js
 import jwt from 'jsonwebtoken';
 import User from '@/models/User';
+import dbConnect from '@/lib/dbConnect';
 export default async function handler(req, res) {
-  await dbConnect();
+  await dbConnect('social-media');
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
