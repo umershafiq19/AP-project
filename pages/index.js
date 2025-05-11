@@ -66,6 +66,7 @@ export default function Home() {
           <Link href="/" style={navLinkStyle}>🏠 Home</Link>
           <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
           <Link href="/messages" style={navLinkStyle}>🔔 Inbox</Link>
+          <Link href="/upload" style={navLinkStyle}>📸 Add a Post</Link>
           <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
           <Link href="/profile" style={navLinkStyle}>👤 Profile</Link>
         </nav>
