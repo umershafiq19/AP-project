@@ -53,8 +53,7 @@ export default function UploadPhoto() {
     setIsSubmitting(true); // Disable further submissions while uploading
 
     try {
-      // Call the API to create the post
-      const res = await fetch('/api/posts/index', {
+      const res = await fetch('/api/uploadphoto/upload', {
         method: 'POST',
         body: formData,
       });
