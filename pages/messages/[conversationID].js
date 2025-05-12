@@ -2,18 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import styles from "../../styles/ChatPage.module.css"; 
-
+import users from "../api/auth/me";
+import User from "@/models/User";
 export default function ChatPage() {
   const router = useRouter();
   const { conversationID } = router.query;
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const currentUserId = "66349f3125f7e6cc0fdd1b18";
+  const currentUserId = {users}
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+  
 
   useEffect(() => {
     if (conversationID) {

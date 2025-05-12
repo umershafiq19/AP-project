@@ -6,4 +6,4 @@ const ConversationSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-export default mongoose.models.ConversationSchemaonversationSchemaonversation || mongoose.model('Conversation', ConversationSchema);
+export default mongoose.models.Conversation || mongoose.model('Conversation', ConversationSchema);

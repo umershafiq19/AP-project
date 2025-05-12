@@ -1,30 +1,34 @@
 // pages/messages/index.js
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/router";
 import Image from "next/image";
 import styles from "../../styles/MessagePage.module.css";
 import { FiEdit } from "react-icons/fi";
+import users from "../api/auth/me";
+import User from "@/models/User";
+
 
 export default function MessagesPage() {
-  const [chats, setChats] = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const currentUserId = "66349f3125f7e6cc0fdd1b18";
   const messagesEndRef = useRef(null);
-  const router = useRouter();
+  const currentUserId="66349f3125f7e6cc0fdd1b18";
+
+ // Replace with actual logged-in user ID
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    async function fetchInbox() {
-      const res = await fetch(`/api/messages/inbox/${currentUserId}`);
+    // Fetch all users (excluding current user)
+    const fetchUsers = async () => {
+      const res = await fetch(`/api/users/all?currentUserId=${currentUserId}`);
       const data = await res.json();
-      setChats(data);
-    }
-    fetchInbox();
+      setUsers(data);
+    };
+    fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -67,26 +71,26 @@ export default function MessagesPage() {
           Inbox
           <FiEdit style={{ marginLeft: "auto", cursor: "pointer" }} title="New Message" />
         </div>
-        {chats.length === 0 ? (
-          <p className={styles.noConversations}>No conversations yet</p>
+        {users.length === 0 ? (
+          <p className={styles.noConversations}>No users available</p>
         ) : (
-          chats.map((chat) => (
+          users.map((user) => (
             <div
-              key={chat._id}
-              onClick={() => setSelectedChat(chat)}
+              key={user._id}
+              onClick={() => setSelectedChat(user)}
               className={`${styles.chatItem} ${
-                selectedChat && selectedChat._id === chat._id ? styles.selected : ""
+                selectedChat && selectedChat._id === user._id ? styles.selected : ""
               }`}
             >
               <Image
-                src={chat.avatar || "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d"}
+                src={user.avatar}
                 width={44}
                 height={44}
                 className={styles.chatAvatar}
                 alt="avatar"
               />
               <div className={styles.chatInfo}>
-                <p className={styles.chatUsername}>{chat.username}</p>
+                <p className={styles.chatUsername}>{user.username}</p>
               </div>
             </div>
           ))
@@ -121,7 +125,7 @@ export default function MessagesPage() {
                 >
                   {msg.senderId !== currentUserId && (
                     <Image
-                      src="https://images.unsplash.com/photo-1544005313-94ddf0286df2"
+                      src={selectedChat.avatar }
                       width={32}
                       height={32}
                       className={styles.smallAvatar}
