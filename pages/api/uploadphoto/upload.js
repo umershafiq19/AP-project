@@ -12,12 +12,27 @@ export const config = {
 };
 
 const handler = async (req, res) => {
-  await dbConnect();
+  await dbConnect('social-media');
 
   if (req.method === 'POST') {
-    const form = new formidable.IncomingForm();
-    form.uploadDir = path.join(process.cwd(), '/public/uploads');
-    form.keepExtensions = true;
+    const token = req.cookies.token;
+    
+      // Check if token is provided
+      if (!token) {
+        return res.status(401).json({ error: "Unauthorized. No token found." });
+      }
+    
+      let decoded;
+      try {
+        // Verify the token and extract user data
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+      } catch (err) {
+        return res.status(401).json({ error: "Invalid or expired token." });
+      }
+    const form = new formidable.IncomingForm({
+        uploadDir: path.join(process.cwd(), "public/uploads"), // Save files to public/uploads
+        keepExtensions: true, // Preserve file extensions
+      });
     form.parse(req, async (err, fields, files) => {
       if (err) {
         return res.status(500).json({ error: 'Error during file parsing.' });
@@ -28,7 +43,7 @@ const handler = async (req, res) => {
 
       try {
         const post = new Post({
-          userId: 'YOUR_USER_ID',
+          userId: new Date().getTime().toString(),
           image: imagePath,
           caption: caption,
           likes: 0,
