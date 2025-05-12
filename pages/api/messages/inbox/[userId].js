@@ -2,8 +2,8 @@
 import clientPromise from "@/lib/mongodb";
 import mongoose from "mongoose";
 import Conversation from "@/models/conversation";
-import Message from "@/models/message";
-import User from "@/models/user"; // Add user model import for avatar/username
+import Message from "@/models/Message";
+import User from "@/models/User"; // Add user model import for avatar/username
 
 export default async function handler(req, res) {
   const { userId } = req.query;
