@@ -5,7 +5,7 @@ import styles from "../../styles/MessagePage.module.css";
 import { FiEdit } from "react-icons/fi";
 import users from "../api/auth/me";
 import User from "@/models/User";
-
+import { useSession } from "next-auth/react";
 
 export default function MessagesPage() {
   const [users, setUsers] = useState([]);
@@ -16,6 +16,8 @@ export default function MessagesPage() {
   const currentUserId="66349f3125f7e6cc0fdd1b18";
 
  // Replace with actual logged-in user ID
+  //const { data: session } = useSession();
+//   const currentUserId = session?.user?.id;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

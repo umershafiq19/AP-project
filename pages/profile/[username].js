@@ -30,7 +30,12 @@ export default function UserProfile({ user }) {
             <p>{user.bio}</p>
             <p style={{ color: "#ccc" }}>
               {user.followers} followers • {user.following} following
+              
             </p>
+            <Link href="/messages/[converstionID].js" passHref>
+<button style={buttonStyle("✉️", "#3f51b5")}>✉️ Messages</button></Link>
+            
+            
           </div>
         </div>
 
@@ -79,9 +84,11 @@ export async function getServerSideProps(context) {
 
 
 // ----- PostCard Component -----
-function PostCard({ post, router }) {
-  const storedLikes = localStorage.getItem(`likes-${post.id}`);
-  const storedComments = JSON.parse(localStorage.getItem(`comments-${post.id}`)) || [];
+function PostCard({ post }) {
+  const storedLikes = typeof window !== 'undefined' ? localStorage.getItem(`likes-${post._id}`) : null;
+  const storedComments = typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem(`comments-${post._id}`)) || []
+    : [];
 
   const [likes, setLikes] = useState(storedLikes ? parseInt(storedLikes) : post.likes || 0);
   const [hasLiked, setHasLiked] = useState(!!storedLikes);
@@ -92,8 +99,9 @@ function PostCard({ post, router }) {
     const newLikes = hasLiked ? likes - 1 : likes + 1;
     setLikes(newLikes);
     setHasLiked(!hasLiked);
-    localStorage.setItem(`likes-${post.id}`, newLikes);
-    await fetch(`/api/${post.id}/like`, {
+    localStorage.setItem(`likes-${post._id}`, newLikes);
+
+    await fetch(`/api/${post._id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
   };
