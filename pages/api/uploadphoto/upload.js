@@ -1,63 +1,90 @@
+//pages/api/uploadphoto/upload.js
+import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
-import formidable from 'formidable'; // Handles form data parsing
-import Post from '@/models/Post';
 import dbConnect from '@/lib/dbConnect';
-
+import User from '@/models/User';
+import jwt from 'jsonwebtoken';
 
 export const config = {
   api: {
-    bodyParser: false, // Disable default body parsing
+    bodyParser: false, // for formidable to work
   },
 };
 
-const handler = async (req, res) => {
-  await dbConnect('social-media');
-
-  if (req.method === 'POST') {
-    const token = req.cookies.token;
-    
-      // Check if token is provided
-      if (!token) {
-        return res.status(401).json({ error: "Unauthorized. No token found." });
-      }
-    
-      let decoded;
-      try {
-        // Verify the token and extract user data
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-      } catch (err) {
-        return res.status(401).json({ error: "Invalid or expired token." });
-      }
-    const form = new formidable.IncomingForm({
-        uploadDir: path.join(process.cwd(), "public/uploads"), // Save files to public/uploads
-        keepExtensions: true, // Preserve file extensions
-      });
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
-        return res.status(500).json({ error: 'Error during file parsing.' });
-      }
-
-      const { caption } = fields;
-      const imagePath = '/uploads/' + files.image[0].newFilename;
-
-      try {
-        const post = new Post({
-          userId: new Date().getTime().toString(),
-          image: imagePath,
-          caption: caption,
-          likes: 0,
-        });
-
-        await post.save();
-        res.status(201).json({ message: 'Post created successfully.', post });
-      } catch (error) {
-        res.status(500).json({ error: 'Error saving to database.' });
-      }
+// Helper to parse form with a Promise
+const parseForm = (req) => {
+  return new Promise((resolve, reject) => {
+    const form = formidable({
+      multiples: false,
+      uploadDir: path.join(process.cwd(), '/public/uploads'), // Absolute path
+      keepExtensions: true,
     });
-  } else {
-    res.status(405).json({ error: 'Method not allowed.' });
-  }
+
+    form.parse(req, (err, fields, files) => {
+      if (err) reject(err);
+      else resolve({ fields, files });
+    });
+  });
 };
 
-export default handler;
+export default async function handler(req, res) {
+  await dbConnect(); // Connect to MongoDB
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  // Get token from cookies
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    // Verify token and get userId
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
+
+    console.log('Parsing form...');
+    const { fields, files } = await parseForm(req);
+
+    console.log('Parsed fields:', fields);
+    console.log('Parsed files:', files);
+
+    const caption = fields.caption?.[0];
+    const file = files.image?.[0];
+
+    if (!file || !caption) {
+      console.error('Missing fields:', { file, caption });
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const imagePath = `/uploads/${path.basename(file.filepath)}`;
+
+    // Find user and add post to their posts array
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Create new post
+    const newPost = {
+      image: imagePath,
+      caption,
+      likes: 0,
+      createdAt: new Date(),
+    };
+
+    // Add to user's posts array
+    user.posts.unshift(newPost);
+    await user.save();
+
+    console.log('New Post Saved:', newPost);
+
+    return res.status(200).json({ message: 'Upload successful', post: newPost });
+  } catch (error) {
+    console.error('Error uploading post:', error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
