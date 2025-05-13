@@ -4,50 +4,80 @@ import Image from "next/image";
 import styles from "../../styles/ChatPage.module.css"; 
 import users from "../api/auth/me";
 import User from "@/models/User";
+import { useSession } from "next-auth/react";
+
 export default function ChatPage() {
-  const router = useRouter();
-  const { conversationID } = router.query;
-  const [messages, setMessages] = useState([]);
-  const [text, setText] = useState("");
-  const currentUserId = {users}
-  const messagesEndRef = useRef(null);
+ const [messages, setMessages] = useState([]);
+const [text, setText] = useState("");
+const [receiverId, setReceiverId] = useState(null);
+const messagesEndRef = useRef(null);
+const { data: session } = useSession();
+const currentUserId = session?.user?.id;
+const router = useRouter();
+const { conversationID } = router.query;
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   
 
-  useEffect(() => {
-    if (conversationID) {
-      fetch(`/api/messages/${currentUserId}/${conversationID}`)
-        .then((res) => res.json())
-        .then((data) => setMessages(data));
-    }
-  }, [conversationID]);
+useEffect(() => {
+  if (conversationID && currentUserId) {
+    fetch(`/api/conversations/${conversationID}`)
+      .then((res) => res.json())
+      .then((conversation) => {
+        const otherUser = conversation.participants.find(
+          (id) => id !== currentUserId
+        );
+        setReceiverId(otherUser);
+      });
+  }
+}, [conversationID, currentUserId]);
+
+useEffect(() => {
+  if (conversationID) {
+    fetch(`/api/messages/${conversationID}`)
+      .then((res) => res.json())
+      .then((data) => setMessages(data));
+  }
+}, [conversationID]);
+
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+const sendMessage = async () => {
+  if (!text.trim() || !currentUserId || !conversationID || !receiverId) return;
 
-  const sendMessage = async () => {
-    if (!text.trim()) return;
-
-    const newMessage = {
-      senderId: currentUserId,
-      receiverId: conversationID,
-      content: text.trim(),
-      timestamp: new Date().toISOString(), // Add this line
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
-    setText("");
-
-    await fetch("/api/messages/send", {
-      method: "POST",
-      body: JSON.stringify(newMessage),
-      headers: { "Content-Type": "application/json" },
-    });
+  const newMessage = {
+    conversationId: currentUserId,
+    senderId: conversationID,
+    receiverId,
+    content: text.trim(),
+    timestamp: new Date().toISOString(),
   };
+
+  setText(""); // Clear input immediately
+
+  try {
+    const res = await fetch("/api/messages/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newMessage),
+    });
+
+    if (!res.ok) throw new Error("Failed to send");
+
+    const savedMessage = await res.json(); // Get the full message with ID
+    setMessages((prev) => [...prev, savedMessage]); // Push after successful save
+  } catch (error) {
+    console.error("Sending message failed:", error);
+    // Optionally show error UI or revert optimistic update
+  }
+};
+
+
 
   return (
     <div className={styles.chatContainer}>
