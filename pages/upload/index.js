@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+//pages/upload/index.js
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from '@/component/Navbar';
 
@@ -10,6 +11,22 @@ export default function UploadPhoto() {
   const [isSubmitting, setIsSubmitting] = useState(false); // Prevent multiple submissions
   const router = useRouter();
   const fileInputRef = useRef(null);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (!res.ok) {
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -56,12 +73,11 @@ export default function UploadPhoto() {
       const res = await fetch('/api/uploadphoto/upload', {
         method: 'POST',
         body: formData,
+        credentials: 'include', // Include cookies in the request
       });
 
       if (res.ok) {
-        const post = await res.json();  // Assuming the post object is returned
-
-        // Clear state after successful post creation
+        const data = await res.json();
         setBanner({ message: 'Posted successfully!', type: 'success' });
         setImage(null);
         setPreview(null);
@@ -72,7 +88,8 @@ export default function UploadPhoto() {
           router.push('/profile'); // Redirect to user profile
         }, 2000);
       } else {
-        setBanner({ message: 'Failed to post. Please try again.', type: 'error' });
+        const error = await res.json();
+        setBanner({ message: error.message || 'Failed to post. Please try again.', type: 'error' });
       }
     } catch (error) {
       setBanner({ message: 'An error occurred. Please try again.', type: 'error' });
