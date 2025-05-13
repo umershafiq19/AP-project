@@ -79,11 +79,9 @@ export async function getServerSideProps(context) {
 
 
 // ----- PostCard Component -----
-function PostCard({ post }) {
-  const storedLikes = typeof window !== 'undefined' ? localStorage.getItem(`likes-${post._id}`) : null;
-  const storedComments = typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem(`comments-${post._id}`)) || []
-    : [];
+function PostCard({ post, router }) {
+  const storedLikes = localStorage.getItem(`likes-${post.id}`);
+  const storedComments = JSON.parse(localStorage.getItem(`comments-${post.id}`)) || [];
 
   const [likes, setLikes] = useState(storedLikes ? parseInt(storedLikes) : post.likes || 0);
   const [hasLiked, setHasLiked] = useState(!!storedLikes);
@@ -94,9 +92,8 @@ function PostCard({ post }) {
     const newLikes = hasLiked ? likes - 1 : likes + 1;
     setLikes(newLikes);
     setHasLiked(!hasLiked);
-    localStorage.setItem(`likes-${post._id}`, newLikes);
-
-    await fetch(`/api/posts/${post._id}/like`, {
+    localStorage.setItem(`likes-${post.id}`, newLikes);
+    await fetch(`/api/${post.id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
   };
@@ -147,7 +144,7 @@ function PostCard({ post }) {
 
       <div style={{ padding: "15px" }}>
         <p>{post.caption}</p>
-        <p style={{ color: "#aaa", marginBottom: "10px" }}>{likes} likes</p>
+        <p style={{ color: "#aaa", marginBottom: "10px" }}> {likes} likes</p>
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
           <button onClick={handleLike} style={buttonStyle("❤️", "#ff4081")}>❤️ Like</button>

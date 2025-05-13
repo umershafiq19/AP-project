@@ -43,25 +43,35 @@ export default function MessagesPage() {
     scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!text.trim() || !selectedChat) return;
+ const sendMessage = async () => {
+  if (!text.trim() || !selectedChat) return;
 
-    const newMessage = {
-      senderId: currentUserId,
-      receiverId: selectedChat._id,
-      content: text.trim(),
-      timestamp: new Date().toISOString(),
-    };
+  const newMessage = {
+    senderId: currentUserId,
+    receiverId: selectedChat._id,
+    content: text.trim(),
+    timestamp: new Date().toISOString(),
+  };
 
-    setMessages((prev) => [...prev, newMessage]);
-    setText("");
+  setText(""); // Clear input immediately for better UX
 
-    await fetch("/api/messages/send", {
+  try {
+    const res = await fetch("/api/messages/send", {
       method: "POST",
       body: JSON.stringify(newMessage),
       headers: { "Content-Type": "application/json" },
     });
-  };
+
+    if (!res.ok) throw new Error("Message not sent");
+
+    const savedMessage = await res.json(); // message with _id
+    setMessages((prev) => [...prev, savedMessage]); // push only saved message
+  } catch (err) {
+    console.error("Send error", err);
+    // Optionally show UI alert
+  }
+};
+
 
   return (
     <div className={styles.pageContainer}>

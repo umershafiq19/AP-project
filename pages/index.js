@@ -108,7 +108,7 @@ function PostCard({ post, router }) {
     setLikes(newLikes);
     setHasLiked(!hasLiked);
     localStorage.setItem(`likes-${post.id}`, newLikes);
-    await fetch(`/api/posts/${post.id}/like`, {
+    await fetch(`/api/${post.id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
   };
