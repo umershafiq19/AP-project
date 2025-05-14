@@ -93,19 +93,16 @@ export default function UploadPhoto() {
     } catch (error) {
       setBanner({ message: 'An error occurred. Please try again.', type: 'error' });
     } finally {
-      setIsSubmitting(false); // Re-enable submission button
+      setIsSubmitting(false); 
     }
   };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#111', color: '#fff' }}>
-      {/* Reusable Sidebar */}
       <Navbar />
 
-      {/* Main Content */}
       <main style={{ marginLeft: '250px', flex: 1, padding: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
         
-        {/* Banner */}
         {banner.message && (
           <div
             style={{
@@ -125,7 +122,6 @@ export default function UploadPhoto() {
           </div>
         )}
 
-        {/* Post Form */}
         <div
           style={{
             backgroundColor: '#1e1e1e',
