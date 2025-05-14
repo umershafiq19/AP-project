@@ -1,4 +1,4 @@
-//pages/api/uploadphoto/upload.js
+
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
@@ -8,16 +8,16 @@ import jwt from 'jsonwebtoken';
 
 export const config = {
   api: {
-    bodyParser: false, // for formidable to work
+    bodyParser: false, 
   },
 };
 
-// Helper to parse form with a Promise
+
 const parseForm = (req) => {
   return new Promise((resolve, reject) => {
     const form = formidable({
       multiples: false,
-      uploadDir: path.join(process.cwd(), '/public/uploads'), // Absolute path
+      uploadDir: path.join(process.cwd(), '/public/uploads'), 
       keepExtensions: true,
     });
 
@@ -29,20 +29,20 @@ const parseForm = (req) => {
 };
 
 export default async function handler(req, res) {
-  await dbConnect(); // Connect to MongoDB
+  await dbConnect();
 
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  // Get token from cookies
+ 
   const token = req.cookies.token;
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {
-    // Verify token and get userId
+   
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
 
@@ -62,13 +62,13 @@ export default async function handler(req, res) {
 
     const imagePath = `/uploads/${path.basename(file.filepath)}`;
 
-    // Find user and add post to their posts array
+    
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Create new post
+
     const newPost = {
       image: imagePath,
       caption,
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       createdAt: new Date(),
     };
 
-    // Add to user's posts array
+    
     user.posts.unshift(newPost);
     await user.save();
 

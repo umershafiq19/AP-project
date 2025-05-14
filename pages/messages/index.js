@@ -15,16 +15,14 @@ export default function MessagesPage() {
   const messagesEndRef = useRef(null);
   const currentUserId="66349f3125f7e6cc0fdd1b18";
 
- // Replace with actual logged-in user ID
-  //const { data: session } = useSession();
-//   const currentUserId = session?.user?.id;
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    // Fetch all users (excluding current user)
+   
     const fetchUsers = async () => {
       const res = await fetch(`/api/users/all?currentUserId=${currentUserId}`);
       const data = await res.json();
@@ -55,7 +53,7 @@ export default function MessagesPage() {
     timestamp: new Date().toISOString(),
   };
 
-  setText(""); // Clear input immediately for better UX
+  setText("");
 
   try {
     const res = await fetch("/api/messages/send", {
@@ -66,18 +64,18 @@ export default function MessagesPage() {
 
     if (!res.ok) throw new Error("Message not sent");
 
-    const savedMessage = await res.json(); // message with _id
-    setMessages((prev) => [...prev, savedMessage]); // push only saved message
+    const savedMessage = await res.json(); 
+    setMessages((prev) => [...prev, savedMessage]); 
   } catch (err) {
     console.error("Send error", err);
-    // Optionally show UI alert
+    
   }
 };
 
 
   return (
     <div className={styles.pageContainer}>
-      {/* Sidebar */}
+      
       <div className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           Inbox
@@ -109,7 +107,7 @@ export default function MessagesPage() {
         )}
       </div>
 
-      {/* Chat Window */}
+      
       <div className={styles.chatWindow}>
         {selectedChat ? (
           <>

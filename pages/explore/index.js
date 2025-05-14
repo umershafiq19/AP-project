@@ -28,7 +28,7 @@ export default function SearchPage() {
   const handleInputChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-    setResult(null);
+    setResult(null); 
     if (term === "") {
       setFiltered([]);
     } else {

@@ -38,7 +38,7 @@ useEffect(() => {
         const res = await fetch("/api/auth/me");
         if (res.ok) {
           const data = await res.json();
-          setUsername(data.username); // ✅ Save username into state
+          setUsername(data.username); 
         }
       } catch (error) {
         console.error("Failed to fetch logged-in user:", error);
@@ -50,22 +50,22 @@ useEffect(() => {
 
   if (!users.length) return <div>Loading...</div>;
 
-  // Display only one post per user
+ 
   const allPosts = users.map((user) => ({
-    ...user.posts[0], // Get the first post of each user
+    ...user.posts[0],
     user,
   }));
  
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#111", color: "#fff" }}>
-      {/* Sidebar */}
+      
       <Navbar></Navbar>
 
-      {/* Main Content */}
+     
       <main
         style={{
-          marginLeft: "250px", // same as sidebar width
+          marginLeft: "250px", 
           flex: 1,
           padding: "20px",
           display: "flex",
@@ -144,9 +144,7 @@ function PostCard({ post, router }) {
   <button onClick={handleLike} style={buttonStyle("❤️", "#ff4081")}>❤️ Like</button>
   <button onClick={() => setShowCommentBox(!showCommentBox)} style={buttonStyle("💬", "#00bcd4")}>💬 Comment</button>
   <button style={buttonStyle("🔗", "#9c27b0")}>🔗 Share</button>
-  {/* <Link href="/messages/[converstionID].js" passHref>
-    <button style={buttonStyle("✉️", "#3f51b5")}>✉️ Messages</button>
-  </Link> */}
+  
 </div>
 
 

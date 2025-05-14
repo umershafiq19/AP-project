@@ -1,4 +1,4 @@
-// pages/api/messages/[conversationId].js
+
 import dbConnect from "@/lib/dbConnect";
 import Message from "@/models/Message";
 
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   try {
     const messages = await Message.find({ conversationId })
-      .sort({ timestamp: 1 }); // oldest → newest
+      .sort({ timestamp: 1 });
 
     return res.status(200).json(messages);
   } catch (error) {

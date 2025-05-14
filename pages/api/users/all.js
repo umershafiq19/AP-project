@@ -1,4 +1,4 @@
-// pages/api/users/all.js
+
 import connectDB from "../../../lib/dbConnect";
 import dbConnect from "@/lib/dbConnect";
 import User from "../../../models/User";
