@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Navbar from "@/component/Navbar"; // Import the Navbar component
+import Navbar from "@/component/Navbar"; 
 import styles from "../../styles/Search.module.css"; 
 
 export default function SearchPage() {
@@ -28,7 +28,7 @@ export default function SearchPage() {
   const handleInputChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-    setResult(null); // Clear previous result
+    setResult(null);
     if (term === "") {
       setFiltered([]);
     } else {
@@ -48,10 +48,9 @@ export default function SearchPage() {
 
   return (
     <div className={styles.container}>
-      {/* Navbar Component */}
       <Navbar />
 
-      {/* Main */}
+      
       <main className={styles.main}>
         <h1>🔍 Search Users</h1>
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
@@ -105,7 +104,7 @@ export default function SearchPage() {
   );
 }
 
-// Helper to highlight matching part
+
 function highlightMatch(username, term) {
   const index = username.toLowerCase().indexOf(term.toLowerCase());
   if (index === -1) return username;
