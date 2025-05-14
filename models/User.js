@@ -18,7 +18,6 @@ const UserSchema = new mongoose.Schema({
     caption: { type: String, required: true },
     likes: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
-    // Any other fields for the post...
   }],
 
 });
@@ -42,4 +41,5 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 // Avoid model overwrite issue in development
-export default mongoose.models.User || mongoose.model('User', UserSchema);
+
+export default mongoose.models?.User || mongoose.model("User", UserSchema);

@@ -40,6 +40,14 @@ export default function Navbar() {
     fetchUsername();
   }, []);
 
+  const navItems = [
+    { href: "/", label: "🏠 Home" },
+    { href: "/explore", label: "🔍 Explore" },
+    { href: "/messages", label: "📥 Inbox" },
+    { href: "/notifications", label: "🔔 Notifications" },
+    { href: "/upload", label: "📸 Add a Post" },
+  ];
+
   return (
     <aside
       style={{
@@ -52,23 +60,56 @@ export default function Navbar() {
         padding: "30px 20px",
         display: "flex",
         flexDirection: "column",
-        gap: "20px",
+        gap: "25px",
         borderRight: "1px solid #333",
+        fontFamily: "Arial, sans-serif",
       }}
     >
-      <h2 style={{ color: "#fff", marginBottom: "30px", fontSize: "24px" }}>Connectify</h2>
-      <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-        <Link href="/" style={navLinkStyle}>🏠 Home</Link>
-        <Link href="/explore" style={navLinkStyle}>🔍 Explore</Link>
-        <Link href="/messages" style={navLinkStyle}>📥 Inbox</Link>
-        <Link href="/notifications" style={navLinkStyle}>🔔 Notifications</Link>
-        <Link href="/upload" style={navLinkStyle}>📸 Add a Post </Link>
-        <button onClick={goToProfile} style={{ ...navLinkStyle, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+      <h2 style={{ color: "#fff", fontSize: "26px", fontWeight: "bold" }}>Connectify</h2>
+
+      <nav style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            style={{
+              ...navLinkStyle,
+              backgroundColor: router.pathname === item.href ? "#333" : "transparent",
+            }}
+          >
+            {item.label}
+          </Link>
+        ))}
+
+        <button
+          onClick={goToProfile}
+          style={{
+            ...navLinkStyle,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
           👤 Profile
         </button>
-        <button onClick={handleSignOut} style={{ ...navLinkStyle, backgroundColor: "#333", border: "none", cursor: "pointer", textAlign: "left" }}>
-          🚪 Sign Out
-        </button>
+
+        <button
+  onClick={handleSignOut}
+  style={{
+    ...navLinkStyle,
+    border: "none",
+    background: "none",
+    cursor: "pointer",
+    textAlign: "left",
+    color: "#f55",
+  }}
+  onMouseEnter={(e) => (e.target.style.backgroundColor = "#333")}
+  onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
+>
+  🚪 Sign Out
+</button>
+
       </nav>
     </aside>
   );
@@ -77,8 +118,10 @@ export default function Navbar() {
 const navLinkStyle = {
   color: "#ccc",
   textDecoration: "none",
-  fontSize: "18px",
+  fontSize: "17px",
   padding: "10px 15px",
   borderRadius: "8px",
-  transition: "all 0.3s ease",
+  transition: "background-color 0.3s ease",
+  display: "block",
 };
+

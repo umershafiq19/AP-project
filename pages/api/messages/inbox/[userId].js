@@ -2,12 +2,15 @@
 import clientPromise from "@/lib/mongodb";
 import mongoose from "mongoose";
 import Conversation from "@/models/conversation";
-import Message from "@/models/message";
-import User from "@/models/user"; // Add user model import for avatar/username
+import Message from "@/models/Message";
+import User from "@/models/User"; // Add user model import for avatar/username
 
 export default async function handler(req, res) {
   const { userId } = req.query;
-
+  if (mongoose.connection.readyState === 0) {
+  const client = await clientPromise;
+  await mongoose.connect(process.env.MONGODB_URI);
+}
   if (req.method === "GET") {
     try {
       // Fetch conversations for the user
@@ -16,24 +19,25 @@ export default async function handler(req, res) {
       }).populate("participants"); // Populate the participants to get their details
 
       // Get the last message for each conversation
-      const populatedConversations = await Promise.all(
-        conversations.map(async (conversation) => {
-          const lastMessage = await Message.findOne({ 
-            conversationId: conversation._id 
-          }).sort({ timestamp: -1 }); // Get the most recent message
+     const populatedConversations = await Promise.all(
+  conversations.map(async (conversation) => {
+    const lastMessage = await Message.findOne({ 
+      conversationId: conversation._id 
+    }).sort({ timestamp: -1 });
 
-          const otherUser = conversation.participants.find(
-            (participant) => participant !== userId
-          );
+    const otherUser = conversation.participants.find(
+      (participant) => participant._id.toString() !== userId
+    );
 
-          return {
-            ...conversation.toObject(),
-            lastMessage: lastMessage ? lastMessage.content : "No messages yet",
-            avatar: otherUser.avatar, // Assuming otherUser has an avatar field
-            username: otherUser.username,
-          };
-        })
-      );
+    return {
+      ...conversation.toObject(),
+      lastMessage: lastMessage ? lastMessage.content : "No messages yet",
+      avatar: otherUser?.avatar || null,
+      username: otherUser?.username || "Unknown",
+    };
+  })
+);
+
 
       res.status(200).json(populatedConversations);
     } catch (error) {

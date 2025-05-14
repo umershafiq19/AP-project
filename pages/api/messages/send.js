@@ -1,46 +1,24 @@
-// pages/api/messages/send.js
-import clientPromise from "@/lib/mongodb";
-import Message from "@/models/message";
-import Conversation from "@/models/conversation";
+import dbConnect from "@/lib/dbConnect";
+import Message from "@/models/Message";
 
 export default async function handler(req, res) {
-  if (req.method === "POST") {
-    try {
-      const { senderId, receiverId, content } = req.body;
+  if (req.method !== "POST") return res.status(405).end();
 
-      // Check if a conversation already exists
-      let conversation = await Conversation.findOne({
-        participants: { $all: [senderId, receiverId] },
-      });
+  await dbConnect();
 
-      // If no conversation exists, create a new one
-      if (!conversation) {
-        conversation = new Conversation({
-          participants: [senderId, receiverId],
-          lastMessage: content,
-        });
-        await conversation.save();
-      } else {
-        // Update last message in existing conversation
-        conversation.lastMessage = content;
-        await conversation.save();
-      }
+  try {
+    const { senderId, receiverId, content, timestamp } = req.body;
 
-      // Save the new message
-      const newMessage = new Message({
-        senderId,
-        receiverId,
-        content,
-        timestamp: new Date(),
-        conversationId: conversation._id,
-      });
+    const message = await Message.create({
+      senderId,
+      receiverId,
+      content,
+      timestamp,
+    });
 
-      await newMessage.save();
-      res.status(201).json(newMessage);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to send message" });
-    }
-  } else {
-    res.status(405).json({ error: "Method not allowed" });
+    res.status(201).json(message);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to send message" });
   }
 }

@@ -1,24 +1,23 @@
-import dbConnect from '@/lib/dbConnect';
-import Message from '@/models/Message'; // Correct the path if necessary
+// pages/api/messages/[conversationId].js
+import dbConnect from "@/lib/dbConnect";
+import Message from "@/models/Message";
 
 export default async function handler(req, res) {
   const { conversationId } = req.query;
 
-  if (req.method === 'GET') {
-    await dbConnect();
+  if (req.method !== "GET") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
 
-    try {
-      const messages = await Message.find({ conversationId });
+  await dbConnect();
 
-      if (messages.length > 0) {
-        res.status(200).json(messages);
-      } else {
-        res.status(404).json({ message: 'No messages found' });
-      }
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching messages', error });
-    }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
+  try {
+    const messages = await Message.find({ conversationId })
+      .sort({ timestamp: 1 }); // oldest → newest
+
+    return res.status(200).json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return res.status(500).json({ message: "Error fetching messages", error });
   }
 }

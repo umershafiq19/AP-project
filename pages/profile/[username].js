@@ -30,7 +30,12 @@ export default function UserProfile({ user }) {
             <p>{user.bio}</p>
             <p style={{ color: "#ccc" }}>
               {user.followers} followers • {user.following} following
+              
             </p>
+            <Link href="/messages/[converstionID].js" passHref>
+<button style={buttonStyle("✉️", "#3f51b5")}>✉️ Messages</button></Link>
+            
+            
           </div>
         </div>
 
@@ -96,7 +101,7 @@ function PostCard({ post }) {
     setHasLiked(!hasLiked);
     localStorage.setItem(`likes-${post._id}`, newLikes);
 
-    await fetch(`/api/posts/${post._id}/like`, {
+    await fetch(`/api/${post._id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
   };
@@ -147,7 +152,7 @@ function PostCard({ post }) {
 
       <div style={{ padding: "15px" }}>
         <p>{post.caption}</p>
-        <p style={{ color: "#aaa", marginBottom: "10px" }}>{likes} likes</p>
+        <p style={{ color: "#aaa", marginBottom: "10px" }}> {likes} likes</p>
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
           <button onClick={handleLike} style={buttonStyle("❤️", "#ff4081")}>❤️ Like</button>
