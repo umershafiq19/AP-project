@@ -6,7 +6,7 @@ export default function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Clear the JWT cookie by setting Max-Age to 0
+
   res.setHeader('Set-Cookie', 'token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict; Secure');
 
   return res.status(200).json({ success: true, message: 'Logged out successfully' });

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
-import Navbar from "@/component/Navbar"; // Import Navbar component
+import Navbar from "@/component/Navbar"; 
 import Post from "@/models/Post";
 import { useState } from "react";
 
@@ -11,12 +11,12 @@ export default function UserProfile({ user }) {
 
   return (
     <div style={styles.pageContainer}>
-      {/* Sidebar - NavBar Component */}
+      
       <Navbar />
 
-      {/* Main Content */}
+      
       <div style={styles.mainContent}>
-        {/* Profile Header */}
+        
         <div style={styles.profileHeader}>
           <Image
             src={user.avatar}
@@ -39,7 +39,7 @@ export default function UserProfile({ user }) {
           </div>
         </div>
 
-        {/* User Posts */}
+       
         <div
           style={{
             display: "grid",
@@ -68,12 +68,12 @@ export async function getServerSideProps(context) {
   await dbConnect('social-media');
 
   try {
-    const user = await User.findOne({ username }).lean(); // No need for populate, as posts are embedded
+    const user = await User.findOne({ username }).lean(); 
     if (!user) return { notFound: true };
 
     return {
       props: {
-        user: JSON.parse(JSON.stringify(user)), // Send user data with posts
+        user: JSON.parse(JSON.stringify(user)), 
       },
     };
   } catch (err) {
@@ -83,7 +83,7 @@ export async function getServerSideProps(context) {
 }
 
 
-// ----- PostCard Component -----
+
 function PostCard({ post }) {
   const storedLikes = typeof window !== 'undefined' ? localStorage.getItem(`likes-${post._id}`) : null;
   const storedComments = typeof window !== 'undefined'
@@ -204,7 +204,7 @@ const styles = {
     backgroundColor: "#111",
     color: "#fff",
     minHeight: "100vh",
-    marginLeft: "250px", // Adjust the main content margin to prevent overlap
+    marginLeft: "250px", 
     width: "100%",
   },
   loading: {

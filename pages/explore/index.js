@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Navbar from "@/component/Navbar"; // Import the Navbar component
+import Navbar from "@/component/Navbar"; 
 import styles from "../../styles/Search.module.css"; 
 
 export default function SearchPage() {
@@ -28,7 +28,7 @@ export default function SearchPage() {
   const handleInputChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-    setResult(null); // Clear previous result
+    setResult(null); 
     if (term === "") {
       setFiltered([]);
     } else {

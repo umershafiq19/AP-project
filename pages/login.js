@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/router'; // ✅ Import useRouter
+import { useRouter } from 'next/router'; 
 import styles from '@/styles/Login.module.css';
 
 export default function Login() {
   const { register, handleSubmit } = useForm();
   const [error, setError] = useState('');
-  const router = useRouter(); // ✅ Initialize router
+  const router = useRouter(); 
 
   const onSubmit = async ({ email, password }) => {
     try {
@@ -21,7 +21,7 @@ export default function Login() {
       if (!res.ok) {
         setError(data.error || 'Login failed');
       } else {
-        router.push('/'); // ✅ Smooth client-side redirect
+        router.push('/'); 
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import styles from '@/styles/Signup.module.css'; // Create this CSS file
+import styles from '@/styles/Signup.module.css'; 
 
 export default function Signup() {
   const { register, handleSubmit, watch } = useForm();
@@ -16,7 +16,7 @@ export default function Signup() {
     password: data.password,
     name: `${data.firstName} ${data.surname}`,
     gender: data.gender === 'custom' ? data.customGender : data.gender,
-    dob: `${data.day}-${data.month}-${data.year}`, // optional
+    dob: `${data.day}-${data.month}-${data.year}`, 
   };
 
   try {
@@ -34,7 +34,7 @@ export default function Signup() {
 };
 
 
-  // Generate date options
+  
   const days = Array.from({length: 31}, (_, i) => i + 1);
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',

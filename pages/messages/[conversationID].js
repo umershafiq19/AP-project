@@ -58,7 +58,7 @@ const sendMessage = async () => {
     timestamp: new Date().toISOString(),
   };
 
-  setText(""); // Clear input immediately
+  setText(""); 
 
   try {
     const res = await fetch("/api/messages/send", {
@@ -69,11 +69,11 @@ const sendMessage = async () => {
 
     if (!res.ok) throw new Error("Failed to send");
 
-    const savedMessage = await res.json(); // Get the full message with ID
-    setMessages((prev) => [...prev, savedMessage]); // Push after successful save
+    const savedMessage = await res.json(); 
+    setMessages((prev) => [...prev, savedMessage]); 
   } catch (error) {
     console.error("Sending message failed:", error);
-    // Optionally show error UI or revert optimistic update
+    
   }
 };
 
@@ -133,7 +133,7 @@ const sendMessage = async () => {
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e)=>{
             if(e.key==="Enter"){
-              //e.preventDefault();
+            
               sendMessage();
             }
           }}

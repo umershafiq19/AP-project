@@ -1,9 +1,9 @@
-// pages/api/messages/inbox/[userId].js
+
 import clientPromise from "@/lib/mongodb";
 import mongoose from "mongoose";
 import Conversation from "@/models/conversation";
 import Message from "@/models/Message";
-import User from "@/models/User"; // Add user model import for avatar/username
+import User from "@/models/User"; 
 
 export default async function handler(req, res) {
   const { userId } = req.query;
@@ -13,12 +13,11 @@ export default async function handler(req, res) {
 }
   if (req.method === "GET") {
     try {
-      // Fetch conversations for the user
+      
       const conversations = await Conversation.find({
-        participants: { $in: [userId] }, // Find conversations involving the user
-      }).populate("participants"); // Populate the participants to get their details
-
-      // Get the last message for each conversation
+        participants: { $in: [userId] }, 
+      }).populate("participants"); 
+      
      const populatedConversations = await Promise.all(
   conversations.map(async (conversation) => {
     const lastMessage = await Message.findOne({ 

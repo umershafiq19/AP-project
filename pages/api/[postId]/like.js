@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   await dbConnect();
 
-  // Validate postId format first
+  
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return res.status(400).json({ error: "Invalid Post ID format" });
   }

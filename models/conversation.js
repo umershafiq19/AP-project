@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const ConversationSchema = new mongoose.Schema({
-  participants: [String], // array of usernames or user IDs
+  participants: [String], 
   lastMessage: String,
   updatedAt: { type: Date, default: Date.now },
 }, { timestamps: true });

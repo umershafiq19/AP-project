@@ -1,4 +1,4 @@
-// pages/api/users/[username].js
+
 import clientPromise from "@/lib/mongodb";
 import mongoose from "mongodb";
 
@@ -11,11 +11,11 @@ export default async function handler(req, res) {
 
   try {
     const client = await clientPromise;
-    const db = client.db("social-media"); // Change to your actual DB name
+    const db = client.db("social-media"); 
 
     const user = await db.collection("users").findOne(
       { username },
-      { projection: { password: 0 } } // Optional: exclude sensitive fields
+      { projection: { password: 0 } } 
     );
 
     if (!user) {
