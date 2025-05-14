@@ -108,7 +108,7 @@ function PostCard({ post, router }) {
     setLikes(newLikes);
     setHasLiked(!hasLiked);
     localStorage.setItem(`likes-${post.id}`, newLikes);
-    await fetch(`/api/posts/${post.id}/like`, {
+    await fetch(`/api/${post.id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
   };
@@ -154,9 +154,9 @@ function PostCard({ post, router }) {
   <button onClick={handleLike} style={buttonStyle("❤️", "#ff4081")}>❤️ Like</button>
   <button onClick={() => setShowCommentBox(!showCommentBox)} style={buttonStyle("💬", "#00bcd4")}>💬 Comment</button>
   <button style={buttonStyle("🔗", "#9c27b0")}>🔗 Share</button>
-  <Link href="/messages/[converstionID].js" passHref>
+  {/* <Link href="/messages/[converstionID].js" passHref>
     <button style={buttonStyle("✉️", "#3f51b5")}>✉️ Messages</button>
-  </Link>
+  </Link> */}
 </div>
 
 
