@@ -85,7 +85,6 @@ export default function UploadPhoto() {
 
         setTimeout(() => {
           setBanner({ message: '', type: '' });
-          router.push('/profile'); // Redirect to user profile
         }, 2000);
       } else {
         const error = await res.json();

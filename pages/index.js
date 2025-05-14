@@ -9,17 +9,7 @@ export default function Home() {
   const [users, setUsers] = useState([]);
   const [username, setUsername] = useState(null);
 
-  const handleSignOut = async () => {
-  try {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    router.push("/login");
-  } catch (error) {
-    console.error("Logout failed", error);
-  }
-};
+  
 
   useEffect(() => {
   const checkAuthAndFetchData = async () => {

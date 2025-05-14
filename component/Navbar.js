@@ -44,7 +44,6 @@ export default function Navbar() {
     { href: "/", label: "🏠 Home" },
     { href: "/explore", label: "🔍 Explore" },
     { href: "/messages", label: "📥 Inbox" },
-    { href: "/notifications", label: "🔔 Notifications" },
     { href: "/upload", label: "📸 Add a Post" },
   ];
 
