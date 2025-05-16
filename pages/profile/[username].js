@@ -51,7 +51,7 @@ export default function UserProfile({ user }) {
         >
           {user?.posts?.length > 0 ? (
             user.posts.map((post) => (
-              <PostCard key={post._id} post={{ ...post, user }} />
+              <PostCard key={post.id} post={{ ...post, user }} />
             ))
           ) : (
             <p style={{ color: "#888" }}>No posts to display.</p>
@@ -85,9 +85,9 @@ export async function getServerSideProps(context) {
 
 
 function PostCard({ post }) {
-  const storedLikes = typeof window !== 'undefined' ? localStorage.getItem(`likes-${post._id}`) : null;
+  const storedLikes = typeof window !== 'undefined' ? localStorage.getItem(`likes-${post.id}`) : null;
   const storedComments = typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem(`comments-${post._id}`)) || []
+    ? JSON.parse(localStorage.getItem(`comments-${post.id}`)) || []
     : [];
 
   const [likes, setLikes] = useState(storedLikes ? parseInt(storedLikes) : post.likes || 0);
@@ -99,9 +99,9 @@ function PostCard({ post }) {
     const newLikes = hasLiked ? likes - 1 : likes + 1;
     setLikes(newLikes);
     setHasLiked(!hasLiked);
-    localStorage.setItem(`likes-${post._id}`, newLikes);
+    localStorage.setItem(`likes-${post.id}`, newLikes);
 
-    await fetch(`/api/${post._id}/like`, {
+    await fetch(`/api/${post.id}/like`, {
       method: hasLiked ? "DELETE" : "POST",
     });
   };
@@ -112,9 +112,9 @@ function PostCard({ post }) {
     const newComments = [...comments, comment];
     setComments(newComments);
     e.target.reset();
-    localStorage.setItem(`comments-${post._id}`, JSON.stringify(newComments));
+    localStorage.setItem(`comments-${post.id}`, JSON.stringify(newComments));
 
-    await fetch(`/api/posts/${post._id}/comment`, {
+    await fetch(`/api/posts/${post.id}/comment`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ comment }),
